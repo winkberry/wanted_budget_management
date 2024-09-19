@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',  # Simple JWT 추가
     'accounts',
     'rest_framework_simplejwt.token_blacklist',  # 블랙리스트 추가
+    'budget',
 ]
 
 
