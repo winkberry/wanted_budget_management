@@ -16,7 +16,7 @@ ETC Tools: Docker(Compose), Git & Github
 2. [프로젝트 구조 및 설계](#프로젝트-구조-및-설계)
 3. [주요 기능](#주요-기능)
 4. [API 명세서](#API-명세서)
-5. [Postman Test](#Postman-Test)
+5. [포스트맨 API 테스트](#Postman-Test)
 
 <br>
 
