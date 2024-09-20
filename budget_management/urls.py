@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import BudgetCategoryListCreateView
+from .views import BudgetCategoryBulkCreateView
 
 urlpatterns = [
-    path('budget/', BudgetCategoryListCreateView.as_view(), name='budget-list-create'),
+    path('budget/', BudgetCategoryBulkCreateView.as_view(), name='budget-bulk-create'),
 ]
