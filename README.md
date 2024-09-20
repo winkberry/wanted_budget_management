@@ -105,6 +105,8 @@ docker-compose run web python manage.py migrate
 | 예산 설정              | POST       | /api/budget/                                           | 예산을 카테고리 별로 설정합니다.  |
 | 예산 목록 조회          | GET      | /api/budget/                                          | 카테고리 별로 설정된 예산 목록을 조회 합니다.         |
 | 예산 카테고리 조회      | GET      | /api/categories/                                      | 모든 카테고리 목록을 조회 합니다.        |
+| 예산 추천               | POST     | /api/budget/recommendation/                           | 총 금액을 입력하면 카테고리별 예산을 추천해 줍니다.   |
+
 
 
 
