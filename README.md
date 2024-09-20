@@ -108,6 +108,7 @@ docker-compose run web python manage.py migrate
 | 예산 추천               | POST     | /api/budget/recommendation/                           | 총 금액을 입력하면 카테고리별 예산을 추천해 줍니다.   |
 | 지출 등록  | POST | /api/expenses/create/ | 지출을 등록 합니다. (예산 설정한 카테고리 내에서) |
 | 지출 내역 조회  | GET      | /api/expenses/list/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&category=category | 기본 기간 별로, 카테고리 별로 지출 내역을 조회 할 수 있습니다. 총 지출 내역과 카테고리별 총 지출 내역을 알 수 있습니다. |
+| 데일리 지출 안내 | GET | /api/expenses/daily-summary/ | 오늘 총 지출 금액과 카테고리별 오늘 지출 금액, 적정 지출 금액, 위험도에 대해 알려줍니다. |
 
 
 ## Postman Test
@@ -126,6 +127,7 @@ docker-compose run web python manage.py migrate
 ![로그아웃구현](https://github.com/user-attachments/assets/d65bdb22-1da0-42b7-b490-95c6aa0dd4bf)
 
 토큰 만료시 갱신하기
+- body에 리프레쉬 토큰을 실어 보내면 갱신된 엑세스 토큰을 반환함
 ![리프레쉬토큰으로엑세스토큰갱신](https://github.com/user-attachments/assets/b8781b2c-6da7-4e62-9ed8-c205e95e1d20)
 
 모든 API 요청시 엑세스 토큰 필요
@@ -154,6 +156,9 @@ docker-compose run web python manage.py migrate
 지출 목록
 ![버스비추가한토탈지출목록내역](https://github.com/user-attachments/assets/6da2c0bd-e674-4f38-9172-b782b3d187c1)
 
+데일리 지출 안내
+- 오늘 총 지출한 금액, 카테고리별 오늘 지출한 금액과 예산 대비 적정 금액, 위험도 
+![데일리오늘지출안내](https://github.com/user-attachments/assets/8079257f-eae8-4ba3-b93f-b77cf94e6c36)
 
 
 

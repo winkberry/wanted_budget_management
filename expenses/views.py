@@ -5,6 +5,10 @@ from django.db.models import Sum
 from .models import Expense
 from .serializers import ExpenseSerializer, DailyExpenseSerializer
 from django.utils import timezone  # 기간 필터를 처리할 때 사용할 수 있음
+from budget_management.models import BudgetCategory
+from decimal import Decimal
+from rest_framework.views import APIView
+from datetime import date  # 이 부분을 추가
 
 class ExpenseCreateView(generics.CreateAPIView):
     queryset = Expense.objects.all()
@@ -70,46 +74,51 @@ class ExpenseUpdateView(generics.UpdateAPIView):
     def get_queryset(self):
         return Expense.objects.filter(user=self.request.user)
     
-class DailyExpenseSummaryView(generics.ListAPIView):
-    serializer_class = DailyExpenseSerializer
+
+
+class DailyExpenseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        today = timezone.now().date()  # 오늘 날짜
         user = request.user
+        current_month = date.today().month
 
-        # 오늘 지출 항목 조회
-        expenses_today = Expense.objects.filter(user=user, date=today)
+        # 오늘 날짜의 지출 데이터 조회
+        today_expenses = Expense.objects.filter(user=user, date=date.today())
 
-        # 오늘 총 지출
-        total_expense = expenses_today.aggregate(total=Sum('amount'))['total'] or 0
+        if not today_expenses.exists():
+            return Response({"error": "오늘 지출 데이터가 없습니다."}, status=404)
 
-        # 카테고리별 지출 합계
-        category_totals = expenses_today.values('category__category').annotate(total=Sum('amount'))
+        # 카테고리별 지출 총액 계산
+        category_summary = today_expenses.values('category__category').annotate(total=Sum('amount'))
 
-        # 위험도 계산 (카테고리별 예산과 비교)
-        risk_data = []
-        for category_total in category_totals:
-            category_name = category_total['category__category']
-            spent_amount = category_total['total']
-            
-            # 예산 정보 가져오기
-            current_month = timezone.now().month
+        summary = []
+        for category_data in category_summary:
+            category_name = category_data['category__category']
+            spent_amount = category_data['total']
+
+            # 해당 카테고리의 월 예산 정보 가져오기
             budget_category = BudgetCategory.objects.filter(user=user, category=category_name, month=current_month).first()
-            
-            if budget_category:
-                # 오늘 사용하면 적당한 금액 (예산 나누기 31일)
-                daily_budget = budget_category.amount / 31
-                risk_percentage = (spent_amount / daily_budget) * 100 if daily_budget > 0 else 0
-                
-                risk_data.append({
-                    'category': category_name,
-                    'daily_budget': round(daily_budget, 2),
-                    'spent_amount': round(spent_amount, 2),
-                    'risk_percentage': round(risk_percentage, 2),
-                })
+            if not budget_category:
+                daily_budget = Decimal(0)  # 예산 정보가 없으면 0으로 처리
+            else:
+                daily_budget = budget_category.amount / Decimal(31)  # 적정 지출 금액 (예산 / 31일)
+
+            # float로 변환해서 퍼센트 계산
+            risk_percentage = (float(spent_amount) / float(daily_budget)) * 100 if daily_budget > 0 else 0
+            daily_budget_rounded = round(float(daily_budget), 2)  # 소수점 2자리로 제한
+
+            summary.append({
+                'category': category_name,
+                'total_expense': spent_amount,
+                'appropriate_expense': daily_budget_rounded,  # 소수점 2자리까지 표현
+                'risk_percentage': round(risk_percentage, 2),  # 위험도도 소수점 2자리까지
+            })
+
+        # 오늘 총 지출 금액 계산
+        total_expense = today_expenses.aggregate(total=Sum('amount'))['total'] or 0
 
         return Response({
             'total_expense': total_expense,
-            'risk_data': risk_data
-        })
+            'category_summary': summary,
+        }, status=200)
