@@ -128,6 +128,11 @@ docker-compose run web python manage.py migrate
 토큰 만료시 갱신하기
 ![리프레쉬토큰으로엑세스토큰갱신](https://github.com/user-attachments/assets/b8781b2c-6da7-4e62-9ed8-c205e95e1d20)
 
+모든 API 요청시 엑세스 토큰 필요
+- 헤더에 엑세스 토큰과 함께 api 요청 보내야 함 
+- 회원가입, 로그인 시 필요 없음 
+![모든api요청시헤더에엑세스토큰넣어야함](https://github.com/user-attachments/assets/7c86ded0-cb81-498c-9bf1-ca18ff0e14f3)
+
 예산 카테고리 보기
 ![예산카테고리목록반환성공](https://github.com/user-attachments/assets/b03d3677-255f-4019-b830-e2091b7ba142)
 
