@@ -102,5 +102,8 @@ docker-compose run web python manage.py migrate
 | 사용자 로그인          | POST        | /api/accounts/login/                                      | 사용자를 로그인시킵니다.                                     |
 | 사용자 로그아웃        | POST        | /api/accounts//logout/                                      | 사용자를 로그아웃시킵니다.                                   |
 | 엑세스 토큰 발급       | POST        | api/token/refresh/                                      | 엑세스 토큰 만료 시 리프레시 토큰으로 새로운 엑세스 토큰을 발급 합니다. |
+| 예산 설정              | POST       | /api/budget/                                           | 예산을 카테고리 별로 설정합니다.  |
+| 예산 목록 조회          | GET      | /api/budget/                                          | 카테고리 별로 설정된 예산 목록을 조회 합니다.         |
+
 
 
