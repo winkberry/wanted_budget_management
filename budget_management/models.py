@@ -18,4 +18,7 @@ class BudgetCategory(models.Model):
         unique_together = ('user', 'category')  # 유저별로 카테고리 중복 방지
 
     def __str__(self):
-        return f"{self.user.username} - {self.category} : {self.amount}"
+        return self.category  # 카테고리 코드를 반환
+    
+    
+    

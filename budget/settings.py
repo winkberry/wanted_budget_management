@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'accounts',
     'rest_framework_simplejwt.token_blacklist',  # 블랙리스트 추가
     'budget_management',
+    'expenses',
 ]
 
 

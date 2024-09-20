@@ -106,6 +106,9 @@ docker-compose run web python manage.py migrate
 | 예산 목록 조회          | GET      | /api/budget/                                       | 카테고리 별로 설정된 예산 목록을 조회 합니다.         |
 | 예산 카테고리 조회      | GET      | /api/categories/                                      | 모든 카테고리 목록을 조회 합니다.        |
 | 예산 추천               | POST     | /api/budget/recommendation/                           | 총 금액을 입력하면 카테고리별 예산을 추천해 줍니다.   |
+| 지출 등록  | POST | /api/expenses/create/ | 지출을 등록 합니다. (예산 설정한 카테고리 내에서) |
+| 지출 내역 조회  | GET      | /api/expenses/list/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&category=category | 기본 기간 별로, 카테고리 별로 지출 내역을 조회 할 수 있습니다. |
+
 
 
 

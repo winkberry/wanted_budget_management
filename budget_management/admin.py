@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import BudgetCategory
 
-# Register your models here.
+# BudgetCategory 모델을 Admin에 등록
+admin.site.register(BudgetCategory)
