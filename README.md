@@ -16,6 +16,7 @@ ETC Tools: Docker(Compose), Git & Github
 2. [프로젝트 구조 및 설계](#프로젝트-구조-및-설계)
 3. [주요 기능](#주요-기능)
 4. [API 명세서](#API-명세서)
+5. [Postman Test](#Postman Test)
 
 <br>
 
@@ -24,8 +25,6 @@ ETC Tools: Docker(Compose), Git & Github
 이 앱은 사용자들이 예산을 설정하고 지출을 모니터링하며 재무 목표를 달성하는 데 도움이 됩니다. 
 
 ## 프로젝트-구조-및-설계
-
-### ERD
 
 ### 디렉토리 구조
 
@@ -52,6 +51,24 @@ ETC Tools: Docker(Compose), Git & Github
 │   │── serializers.py
 │   │── urls.py
 │   │── views
+│── budget_management
+│   │── __init__.py
+│   │── migrations
+│   │── models.py
+│   │── serializers.py
+│   │── urls.py
+│   │── views
+│── expenses
+│   │── management
+│   │   │──commands
+│   │   │  │──scheduler.py
+│   │── __init__.py
+│   │── migrations
+│   │── models.py
+│   │── serializers.py
+│   │── urls.py
+│   │── views
+│   │── tasks
 
 
 ```
@@ -92,7 +109,11 @@ docker-compose run web python manage.py migrate
 
 ## 주요 기능
 - **회원가입 및 인증**: 계정 생성, JWT를 통한 인증 및 보안 유지.
-- ****: 디스코드 웹훅을 활용하여 
+- **예산 설정 및 추천**: 예산 카테고리 별로 예산을 설정. 유저들이 설정한 카테고리 별 예산을 통계하여 예산을 추천.
+- **지출 CRUD**: 지출을 생성, 수정, 읽기, 삭제, 합계제외.
+- **지출 조회**: 필수적으로 기간으로 조회. 특정 카테고리별로 조회. 합계제외 처리한 지출은 지출 합계에서 제외.
+- **데일리 지출 안내**: 오늘 지출한 내용을 총액과 카테고리 별 금액 안내. 월별 설정한 예산을 기준으로 적정 금액과 오늘 지출한 금액 안내. 카테고리 별 적정 금액, 지출금액의 차이를 위험도 퍼센테이지로 안내.
+
 
 ## API 명세서
 
