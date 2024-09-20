@@ -100,7 +100,12 @@ docker-compose down
 
 -- 로컬 도커 이미지 전체 삭제
 docker rmi $(docker images -q)
+
+-- 에러 로그 출력
+docker-compose logs web
+
 ```
+
 ```
 -- 마이그레이션 명령어
 docker-compose run web python manage.py makemigrations
@@ -113,7 +118,7 @@ docker-compose run web python manage.py migrate
 - **지출 CRUD**: 지출을 생성, 수정, 읽기, 삭제, 합계제외.
 - **지출 조회**: 필수적으로 기간으로 조회. 특정 카테고리별로 조회. 합계제외 처리한 지출은 지출 합계에서 제외.
 - **데일리 지출 안내**: 오늘 지출한 내용을 총액과 카테고리 별 금액 안내. 월별 설정한 예산을 기준으로 적정 금액과 오늘 지출한 금액 안내. 카테고리 별 적정 금액, 지출금액의 차이를 위험도 퍼센테이지로 안내.
-
+- **데일리 지출 추천**: 오늘 지출 가능한 금액, 카테고리별 오늘 지출 가능한 금액, 초과시 최소 한도 설정, 유저의 상황에 맞는 멘트 출력.
 
 ## API 명세서
 
@@ -130,6 +135,7 @@ docker-compose run web python manage.py migrate
 | 지출 등록  | POST | /api/expenses/create/ | 지출을 등록 합니다. (예산 설정한 카테고리 내에서) |
 | 지출 내역 조회  | GET      | /api/expenses/list/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&category=category | 기본 기간 별로, 카테고리 별로 지출 내역을 조회 할 수 있습니다. 총 지출 내역과 카테고리별 총 지출 내역을 알 수 있습니다. |
 | 데일리 지출 안내 | GET | /api/expenses/daily-summary/ | 오늘 총 지출 금액과 카테고리별 오늘 지출 금액, 적정 지출 금액, 위험도에 대해 알려줍니다. |
+| 데일리 지출 추천 | GET | /api/expenses/daily-recommendation/ | 오늘 지출 가능한 금액 합계와 카테고리별 금액 추천, 상황별 안내 메세지. |
 
 
 ## Postman Test
@@ -181,6 +187,9 @@ docker-compose run web python manage.py migrate
 - 오늘 총 지출한 금액, 카테고리별 오늘 지출한 금액과 예산 대비 적정 금액, 위험도 
 ![데일리오늘지출안내](https://github.com/user-attachments/assets/8079257f-eae8-4ba3-b93f-b77cf94e6c36)
 
+데일리 지출 추천
+- 오늘 지출 가능한 금액, 카테고리별 오늘 지출 가능한 금액, 초과시 최소 한도 설정, 유저의 상황에 맞는 멘트 출력
+![오늘지출추천](https://github.com/user-attachments/assets/52d6cfc7-33df-45c2-8b0d-52f19639b087)
 
 
 

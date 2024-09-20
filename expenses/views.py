@@ -10,6 +10,7 @@ from decimal import Decimal
 from rest_framework.views import APIView
 from datetime import date  # 이 부분을 추가
 
+
 class ExpenseCreateView(generics.CreateAPIView):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
@@ -122,3 +123,75 @@ class DailyExpenseSummaryView(APIView):
             'total_expense': total_expense,
             'category_summary': summary,
         }, status=200)
+    
+
+class DailyBudgetRecommendationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        today = date.today()
+        current_month = today.month
+        days_in_month = 31  # 한 달을 31일로 고정
+
+        # 이번 달의 예산을 가져옴
+        budget_categories = BudgetCategory.objects.filter(user=user, month=current_month)
+        if not budget_categories.exists():
+            return Response({"error": "예산이 설정되지 않았습니다."}, status=404)
+
+        # 현재까지의 지출 총액 및 카테고리별 지출
+        spent_up_to_today = Expense.objects.filter(user=user, date__lte=today).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)
+        days_passed = today.day
+        days_left = days_in_month - days_passed
+
+        # 카테고리별 지출 금액 계산
+        total_budget = budget_categories.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)
+        recommended_total_today = Decimal(total_budget) / Decimal(days_in_month)
+
+        # 이미 사용한 금액 계산
+        spent_today = Expense.objects.filter(user=user, date=today).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)
+        overspent = max(Decimal(0), spent_today - recommended_total_today)
+
+        # 남은 일수 동안 부담을 분배
+        daily_adjusted_budget = recommended_total_today
+        if days_left > 0:
+            daily_adjusted_budget -= overspent / Decimal(days_left)
+
+        # 최소 금액 보장
+        daily_adjusted_budget = max(daily_adjusted_budget, Decimal(5000))
+
+        # 카테고리별 추천 금액 계산
+        category_recommendations = []
+        for category in budget_categories:
+            category_budget_per_day = Decimal(category.amount) / Decimal(days_in_month)
+            category_spent_today = Expense.objects.filter(user=user, category=category, date=today).aggregate(Sum('amount'))['amount__sum'] or Decimal(0)
+            category_overspent = max(Decimal(0), category_spent_today - category_budget_per_day)
+
+            # 남은 기간 동안 초과분을 분배
+            category_adjusted_budget = category_budget_per_day
+            if days_left > 0:
+                category_adjusted_budget -= category_overspent / Decimal(days_left)
+
+            # 최소 금액 보장
+            category_adjusted_budget = max(category_adjusted_budget, Decimal(5000))
+
+            category_recommendations.append({
+                "category": category.category,
+                "recommended_amount": int(round(category_adjusted_budget))  # 소수점 제거
+            })
+
+        # 상황에 맞는 멘트
+        if spent_today < recommended_total_today:
+            message = "절약을 잘 실천하고 계시네요! 오늘도 절약 도전!"
+        elif spent_today == recommended_total_today:
+            message = "적정하게 지출하고 계십니다. 꾸준히 유지하세요!"
+        else:
+            message = "오늘 예산을 초과했습니다. 남은 기간 동안 분배하여 조절하세요."
+
+        # 최종 응답
+        return Response({
+            "total_recommended_amount": int(round(daily_adjusted_budget)),  # 소수점 제거
+            "category_recommendations": category_recommendations,
+            "message": message
+        }, status=200)
+    
