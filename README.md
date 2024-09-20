@@ -136,15 +136,12 @@ docker-compose run web python manage.py migrate
 
 예산 금액 설정 목록 보기
 ![예산금액설정한거_목록보기성공](https://github.com/user-attachments/assets/cc499719-6f23-4f0e-8f88-0c0cf41ab1f3)
-![예산카테고리에예산금액지정](https://github.com/user-attachments/assets/84a04e04-690f-443a-a4f6-8099f70bffc0)
-![예산카테고리에예산금액지정할때_헤더에엑세스토큰보내야됨](https://github.com/user-attachments/assets/74e79dd3-4074-4223-b504-3cae668b3963)
 
 예산 추천 기능
 ![예산추천기능성공](https://github.com/user-attachments/assets/96204262-2a63-485d-89d9-010b4d14a5df)
 
 지출 등록
 ![지출등록화장품성공](https://github.com/user-attachments/assets/1b7976c7-d85d-4ae1-80cc-ed3593549d52)
-![지출생성성공](https://github.com/user-attachments/assets/9a1df5ea-9bb5-49cc-b8bd-f6e387b1114e)
 
 지출 목록
 ![버스비추가한토탈지출목록내역](https://github.com/user-attachments/assets/6da2c0bd-e674-4f38-9172-b782b3d187c1)
