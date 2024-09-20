@@ -7,7 +7,7 @@
 RDBMS: PostgreSQL 13 \
 ETC Tools: Docker(Compose), Git & Github
 
-- 기간: 24.09.10 ~ 24.09.20
+- 기간: 24.09.12 ~ 24.09.20
 
 <br>
 
@@ -101,6 +101,6 @@ docker-compose run web python manage.py migrate
 | 사용자 회원가입        | POST        | /api/accounts//register/                                      | 새로운 사용자를 등록합니다.                                  |
 | 사용자 로그인          | POST        | /api/accounts/login/                                      | 사용자를 로그인시킵니다.                                     |
 | 사용자 로그아웃        | POST        | /api/accounts//logout/                                      | 사용자를 로그아웃시킵니다.                                   |
-            |
+| 엑세스 토큰 발급       | POST        | api/token/refresh/                                      | 엑세스 토큰 만료 시 리프레시 토큰으로 새로운 엑세스 토큰을 발급 합니다. |
 
 

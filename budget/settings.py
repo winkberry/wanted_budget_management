@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',  # Simple JWT 추가
     'accounts',
     'rest_framework_simplejwt.token_blacklist',  # 블랙리스트 추가
-    'budget',
+    'budget_management',
 ]
 
 
@@ -61,7 +61,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # 액세스 토큰 만료 시간
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=5),  # 액세스 토큰 만료 시간
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # 리프레시 토큰 만료 시간
     'ROTATE_REFRESH_TOKENS': False,  # 리프레시 토큰 갱신 여부
     'BLACKLIST_AFTER_ROTATION': True,  # 사용된 리프레시 토큰을 블랙리스트에 올릴지 여부
