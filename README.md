@@ -1,7 +1,4 @@
-# wanted_budget_management
-원티드 백엔드 과제 예산 관리 어플리케이션
-
-## Food Finder
+## budget_management
 
 #### **예산 관리 어플리케이션**
 [[원티드 백엔드 프리온보딩 인턴십]](https://www.wanted.co.kr/events/pre_ob_be_1_seoul) - 기업 실무 프로젝트 4차 과제
