@@ -28,3 +28,8 @@ class ExpenseSerializer(serializers.ModelSerializer):
         validated_data['category'] = category  # 카테고리 객체를 할당
 
         return super().create(validated_data)
+    
+class DailyExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Expense
+        fields = ['category', 'amount']

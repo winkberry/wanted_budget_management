@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum
 from .models import Expense
-from .serializers import ExpenseSerializer
+from .serializers import ExpenseSerializer, DailyExpenseSerializer
 from django.utils import timezone  # 기간 필터를 처리할 때 사용할 수 있음
 
 class ExpenseCreateView(generics.CreateAPIView):
@@ -69,3 +69,47 @@ class ExpenseUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return Expense.objects.filter(user=self.request.user)
+    
+class DailyExpenseSummaryView(generics.ListAPIView):
+    serializer_class = DailyExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        today = timezone.now().date()  # 오늘 날짜
+        user = request.user
+
+        # 오늘 지출 항목 조회
+        expenses_today = Expense.objects.filter(user=user, date=today)
+
+        # 오늘 총 지출
+        total_expense = expenses_today.aggregate(total=Sum('amount'))['total'] or 0
+
+        # 카테고리별 지출 합계
+        category_totals = expenses_today.values('category__category').annotate(total=Sum('amount'))
+
+        # 위험도 계산 (카테고리별 예산과 비교)
+        risk_data = []
+        for category_total in category_totals:
+            category_name = category_total['category__category']
+            spent_amount = category_total['total']
+            
+            # 예산 정보 가져오기
+            current_month = timezone.now().month
+            budget_category = BudgetCategory.objects.filter(user=user, category=category_name, month=current_month).first()
+            
+            if budget_category:
+                # 오늘 사용하면 적당한 금액 (예산 나누기 31일)
+                daily_budget = budget_category.amount / 31
+                risk_percentage = (spent_amount / daily_budget) * 100 if daily_budget > 0 else 0
+                
+                risk_data.append({
+                    'category': category_name,
+                    'daily_budget': round(daily_budget, 2),
+                    'spent_amount': round(spent_amount, 2),
+                    'risk_percentage': round(risk_percentage, 2),
+                })
+
+        return Response({
+            'total_expense': total_expense,
+            'risk_data': risk_data
+        })

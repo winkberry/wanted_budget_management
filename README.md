@@ -125,6 +125,9 @@ docker-compose run web python manage.py migrate
 로그아웃
 ![로그아웃구현](https://github.com/user-attachments/assets/d65bdb22-1da0-42b7-b490-95c6aa0dd4bf)
 
+토큰 만료시 갱신하기
+![리프레쉬토큰으로엑세스토큰갱신](https://github.com/user-attachments/assets/b8781b2c-6da7-4e62-9ed8-c205e95e1d20)
+
 예산 카테고리 보기
 ![예산카테고리목록반환성공](https://github.com/user-attachments/assets/b03d3677-255f-4019-b830-e2091b7ba142)
 

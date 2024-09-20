@@ -25,6 +25,14 @@ services:
     networks:
       - app-network
 
+  scheduler:
+      build: .
+      command: python manage.py scheduler  # 스케줄러 명령어 추가
+      depends_on:
+        - web
+      volumes:
+        - .:/app
+
 volumes:
   postgres_data:
 
