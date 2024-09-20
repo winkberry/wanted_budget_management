@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from .models import BudgetCategory
+from .models import BudgetCategory # 모델에서 카테고리를 가져옴
+
+class CategorySerializer(serializers.Serializer):
+    category = serializers.CharField()
+    label = serializers.CharField()
 
 class BudgetCategorySerializer(serializers.ModelSerializer):
     class Meta:
