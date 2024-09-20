@@ -4,11 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum
 from .models import Expense
 from .serializers import ExpenseSerializer, DailyExpenseSerializer
-from django.utils import timezone  # 기간 필터를 처리할 때 사용할 수 있음
+from django.utils import timezone 
 from budget_management.models import BudgetCategory
 from decimal import Decimal
 from rest_framework.views import APIView
-from datetime import date  # 이 부분을 추가
+from datetime import date, timedelta
 
 
 class ExpenseCreateView(generics.CreateAPIView):
@@ -76,7 +76,7 @@ class ExpenseUpdateView(generics.UpdateAPIView):
         return Expense.objects.filter(user=self.request.user)
     
 
-
+# 지출 안내
 class DailyExpenseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -125,6 +125,7 @@ class DailyExpenseSummaryView(APIView):
         }, status=200)
     
 
+# 지출 추천
 class DailyBudgetRecommendationView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -194,4 +195,97 @@ class DailyBudgetRecommendationView(APIView):
             "category_recommendations": category_recommendations,
             "message": message
         }, status=200)
+    
+
+class DailySpendingReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        today = date.today()
+        current_day = today.day
+
+        # 지난달 같은 기간 (ex: 오늘이 9월 20일이라면 8월 20일까지의 지출)
+        last_month_start = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+        last_month_end = last_month_start.replace(day=current_day)
+        last_month_expenses = Expense.objects.filter(user=user, date__range=[last_month_start, last_month_end])
+
+        # 오늘 날짜의 지출 데이터
+        today_expenses = Expense.objects.filter(user=user, date=today)
+
+        # 지난 요일 지출 (ex: 오늘이 금요일이면 지난주 금요일의 지출)
+        last_week_day = today - timedelta(days=7)
+        last_week_expenses = Expense.objects.filter(user=user, date=last_week_day)
+
+        # 오늘 카테고리별 지출 합계
+        category_totals_today = today_expenses.values('category__category').annotate(total=Sum('amount'))
+
+        # 지난달과 오늘 카테고리별 지출 비교
+        category_comparison_last_month = last_month_expenses.values('category__category').annotate(total=Sum('amount'))
+
+        # 오늘 요일과 지난 요일 지출 비교
+        category_comparison_last_week = last_week_expenses.values('category__category').annotate(total=Sum('amount'))
+
+        # 오늘 총 지출
+        total_spent_today = today_expenses.aggregate(Sum('amount'))['amount__sum'] or Decimal(0)
+
+        # 오늘 지출 대비 예산 통계
+        total_budget = BudgetCategory.objects.filter(user=user).aggregate(total_budget=Sum('amount'))['total_budget'] or Decimal(0)
+
+        # 카테고리별 적정 지출 금액 (월별 예산 기준)
+        daily_budget_per_category = BudgetCategory.objects.filter(user=user).values('category', 'amount')
+
+        # daily_budget_per_category를 dictionary 형태로 변환하여 category_name으로 매칭
+        daily_budget_dict = {item['category']: item['amount'] / Decimal(31) for item in daily_budget_per_category}
+
+        # 카테고리별 지출 위험도 계산
+        category_risk = []
+        for category_data in category_totals_today:
+            category_name = category_data['category__category']
+            spent_today = category_data['total']
+
+            # daily_budget_dict에서 적정 금액을 가져옴
+            daily_budget = daily_budget_dict.get(category_name, Decimal(0))
+
+            risk_percentage = (spent_today / daily_budget) * 100 if daily_budget > 0 else 0
+            category_risk.append({
+                'category': category_name,
+                'spent_today': spent_today,
+                'appropriate_spending': round(daily_budget, 2),  # 소수점 2자리로 잘라서 반환
+                'risk_percentage': round(risk_percentage, 2),  # 소수점 2자리로 잘라서 반환
+            })
+
+        # 다른 사용자 대비 소비율 계산
+        other_users_expenses = Expense.objects.exclude(user=user).aggregate(total_expenses=Sum('amount'))['total_expenses'] or Decimal(0)
+        other_users_budget = BudgetCategory.objects.exclude(user=user).aggregate(total_budget=Sum('amount'))['total_budget'] or Decimal(0)
+
+        if other_users_budget > 0:
+            other_users_percentage = (other_users_expenses / other_users_budget) * 100
+        else:
+            other_users_percentage = 0
+
+        # 사용자 대비 소비율
+        if total_budget > 0:
+            my_percentage = (total_spent_today / total_budget) * 100
+            relative_percentage = (my_percentage / other_users_percentage) * 100 if other_users_percentage > 0 else 0
+        else:
+            my_percentage = 0
+            relative_percentage = 0
+
+        # 오늘 사용하면 적당한 금액을 초과했을 때 메시지 설정
+        if my_percentage < 50:
+            message = "절약을 잘 실천하고 계세요! 오늘도 절약 도전!"
+        elif 50 <= my_percentage <= 100:
+            message = "적당히 사용 중이세요!"
+        else:
+            message = "오늘 예산을 초과했어요. 내일은 절약에 도전해보세요!"
+
+        return Response({
+            'total_spent_today': total_spent_today,
+            'category_risk': category_risk,
+            'other_users_percentage': round(other_users_percentage, 2),
+            'my_percentage': round(my_percentage, 2),
+            'relative_percentage': round(relative_percentage, 2),
+            'message': message
+        })
     
